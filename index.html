@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ענק וגמד</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 560px;
+      padding: 30px 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      text-align: center;
+      text-shadow: 0 0 20px rgba(100, 200, 255, 0.5);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #a0c4ff;
+      margin-bottom: 26px;
+      text-align: center;
+    }
+
+    .names-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+
+    .name-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .name-btn:hover {
+      background: rgba(100, 200, 255, 0.25);
+      border-color: #64c8ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(100, 200, 255, 0.3);
+    }
+
+    .name-btn.selected {
+      background: rgba(100, 200, 255, 0.4);
+      border-color: #64c8ff;
+    }
+
+    .name-btn.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .result-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(100, 200, 255, 0.4);
+      border-radius: 16px;
+      padding: 26px 36px;
+      text-align: center;
+      margin-bottom: 20px;
+      width: 100%;
+      line-height: 2;
+    }
+
+    .result-box .chosen-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #64c8ff;
+    }
+
+    .icon { font-size: 3rem; margin-bottom: 10px; }
+
+    .saved-note {
+      font-size: 0.9rem;
+      margin-top: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    .saved-note.ok  { color: #90e0a0; background: rgba(64,145,108,0.2); }
+    .saved-note.err { color: #ffb3b3; background: rgba(200,50,50,0.2); }
+  </style>
+</head>
+<body>
+
+<!-- Screen 1: Choose your name -->
+<div class="screen active" id="screen1">
+  <div class="icon">🎁</div>
+  <h1>בחר את שמך</h1>
+  <p class="subtitle">לחץ על שמך מהרשימה</p>
+  <div class="names-grid" id="names-grid-1"></div>
+</div>
+
+<!-- Screen 2: Who was your anak -->
+<div class="screen" id="screen2">
+  <div class="icon">🎄</div>
+  <h1>מי היה הענק שלך?</h1>
+  <p class="subtitle">למי נתת מתנות?</p>
+  <div class="names-grid" id="names-grid-2"></div>
+</div>
+
+<!-- Screen 3: Who was your gamad (guess) -->
+<div class="screen" id="screen3">
+  <div class="icon">🤔</div>
+  <h1>מי לדעתך היה הגמד שלך?</h1>
+  <p class="subtitle">מי לדעתך נתן לך מתנות?</p>
+  <div class="names-grid" id="names-grid-3"></div>
+</div>
+
+<!-- Screen 4: Done -->
+<div class="screen" id="screen4">
+  <div class="icon">✅</div>
+  <h1>תודה!</h1>
+  <div class="result-box" id="summary-box"></div>
+  <div class="saved-note" id="saved-note"></div>
+</div>
+
+<script>
+  const NAMES = [
+    "שלומי","שרה","שליו","גיל","אמיר","מיכאל","איציק",
+    "דניאל","דן","יוליה","אלמוג","עומר ה","אביב","ליאל",
+    "ידידיה","מיתר","יובל","שחר","צחי","אלון","פז","אבי",
+    "אביה","עומר ע","מאיר רוזנר","ילנה","ניצן"
+  ];
+
+  let selectedName = null;
+  let selectedAnak = null;
+  let selectedGamad = null;
+
+  function buildGrid(containerId, onSelect, excludeName = null) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    NAMES.forEach(name => {
+      const btn = document.createElement("button");
+      btn.className = "name-btn" + (name === excludeName ? " disabled" : "");
+      btn.textContent = name;
+      btn.onclick = () => onSelect(name, btn, container);
+      container.appendChild(btn);
+    });
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  // Screen 1
+  buildGrid("names-grid-1", (name, btn, container) => {
+    container.querySelectorAll(".name-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedName = name;
+    setTimeout(() => {
+      buildGrid("names-grid-2", handleAnakSelect, selectedName);
+      showScreen("screen2");
+    }, 300);
+  });
+
+  // Screen 2
+  function handleAnakSelect(name, btn, container) {
+    container.querySelectorAll(".name-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedAnak = name;
+    setTimeout(() => {
+      buildGrid("names-grid-3", handleGamadSelect, selectedName);
+      showScreen("screen3");
+    }, 300);
+  }
+
+  // Screen 3
+  function handleGamadSelect(name, btn, container) {
+    container.querySelectorAll(".name-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedGamad = name;
+    setTimeout(finalize, 300);
+  }
+
+  async function finalize() {
+    document.getElementById("summary-box").innerHTML = `
+      <div>שמך: <span class="chosen-name">${selectedName}</span></div>
+      <div>הענק שלך (נתת מתנות ל): <span class="chosen-name">${selectedAnak}</span></div>
+      <div>הגמד שלך (ניחוש): <span class="chosen-name">${selectedGamad}</span></div>
+    `;
+    showScreen("screen4");
+
+    const noteEl = document.getElementById("saved-note");
+    try {
+      const res = await fetch("/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: selectedName, anak: selectedAnak, gamad: selectedGamad })
+      });
+      if (res.ok) {
+        noteEl.textContent = "✔ התשובות נשמרו בקובץ";
+        noteEl.className = "saved-note ok";
+      } else {
+        throw new Error("server error");
+      }
+    } catch {
+      noteEl.textContent = "⚠ שגיאה בשמירה — האם השרת פועל?";
+      noteEl.className = "saved-note err";
+    }
+  }
+
+
+</script>
+</body>
+</html>

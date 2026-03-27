@@ -1,1 +1,2 @@
-# no dependencies, stdlib only
+gspread
+google-auth

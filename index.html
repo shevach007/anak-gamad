@@ -209,8 +209,6 @@
     setTimeout(finalize, 300);
   }
 
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjiZOrWCuchqLkpq5qyJfagwRBQhN2znzdRHTjwNfscrQATJLUgPeThEGQXMNxiMhR/exec";
-
   async function finalize() {
     document.getElementById("summary-box").innerHTML = `
       <div>שמך: <span class="chosen-name">${selectedName}</span></div>
@@ -220,13 +218,10 @@
     showScreen("screen4");
 
     const noteEl = document.getElementById("saved-note");
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjiZOrWCuchqLkpq5qyJfagwRBQhN2znzdRHTjwNfscrQATJLUgPeThEGQXMNxiMhR/exec";
     try {
-      await fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: selectedName, anak: selectedAnak, gamad: selectedGamad })
-      });
+      const params = new URLSearchParams({ name: selectedName, anak: selectedAnak, gamad: selectedGamad });
+      await fetch(SCRIPT_URL + "?" + params.toString(), { mode: "no-cors" });
       noteEl.textContent = "✔ התשובות נשמרו";
       noteEl.className = "saved-note ok";
     } catch {

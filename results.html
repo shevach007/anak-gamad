@@ -142,7 +142,7 @@
   async function load() {
       const el = document.getElementById("content");
       try {
-        const res = await fetch(SCRIPT_URL + "?action=data");
+        const res = await fetch(SCRIPT_URL);
         if (!res.ok) throw new Error("server error");
         const entries = await res.json();
 

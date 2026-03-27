@@ -218,7 +218,7 @@
     showScreen("screen4");
 
     const noteEl = document.getElementById("saved-note");
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjiZOrWCuchqLkpq5qyJfagwRBQhN2znzdRHTjwNfscrQATJLUgPeThEGQXMNxiMhR/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7GQCqJeXYsoms5cnCgpaZeODYuZyCxTsSne7UEHlV2rPDeqdtZbfksBFFf8McBj2i9g/exec";
     try {
       const params = new URLSearchParams({ name: selectedName, anak: selectedAnak, gamad: selectedGamad });
       await fetch(SCRIPT_URL + "?" + params.toString(), { mode: "no-cors" });

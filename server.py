@@ -21,7 +21,6 @@ def get_sheet():
 
 def append_entry(entry):
     sheet = get_sheet()
-    # Add header row if sheet is empty
     if sheet.row_count == 0 or sheet.cell(1, 1).value is None:
         sheet.append_row(["שם", "ענק (נתת מתנות ל)", "גמד (ניחוש - מי נתן לך)", "זמן"])
     sheet.append_row([

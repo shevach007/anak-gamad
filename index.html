@@ -209,6 +209,8 @@
     setTimeout(finalize, 300);
   }
 
+  const SCRIPT_URL = "https://script.google.com/u/0/home/projects/1ORgqUvwXtJY352N5ZQL0GApcmeI2yjt1lWpqwDCguB0ThSDO-DWSHh8S/edit";
+
   async function finalize() {
     document.getElementById("summary-box").innerHTML = `
       <div>שמך: <span class="chosen-name">${selectedName}</span></div>
@@ -219,19 +221,16 @@
 
     const noteEl = document.getElementById("saved-note");
     try {
-      const res = await fetch("/save", {
+      await fetch(SCRIPT_URL, {
         method: "POST",
+        mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: selectedName, anak: selectedAnak, gamad: selectedGamad })
       });
-      if (res.ok) {
-        noteEl.textContent = "✔ התשובות נשמרו בקובץ";
-        noteEl.className = "saved-note ok";
-      } else {
-        throw new Error("server error");
-      }
+      noteEl.textContent = "✔ התשובות נשמרו";
+      noteEl.className = "saved-note ok";
     } catch {
-      noteEl.textContent = "⚠ שגיאה בשמירה — האם השרת פועל?";
+      noteEl.textContent = "⚠ שגיאה בשמירה";
       noteEl.className = "saved-note err";
     }
   }

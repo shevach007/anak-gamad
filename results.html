@@ -137,10 +137,12 @@
   <div id="content" class="loading">טוען נתונים...</div>
 
   <script>
-    async function load() {
+    const SCRIPT_URL = "https://script.google.com/u/0/home/projects/1ORgqUvwXtJY352N5ZQL0GApcmeI2yjt1lWpqwDCguB0ThSDO-DWSHh8S/edit";
+
+  async function load() {
       const el = document.getElementById("content");
       try {
-        const res = await fetch("/data");
+        const res = await fetch(SCRIPT_URL + "?action=data");
         if (!res.ok) throw new Error("server error");
         const entries = await res.json();
 
